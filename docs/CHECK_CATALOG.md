@@ -1,21 +1,17 @@
-# Initial Check Catalog
+# Check Catalog
 
-| ID | Check | Method | Output | Risk / caveat |
-|---|---|---|---|---|
-| STR-001 | Duplicate article/subsection label | deterministic | duplicate path candidates | intentional duplicates across chapters possible |
-| STR-002 | Broken hierarchy | deterministic parser | malformed/unknown nesting | Persian formatting variations |
-| REF-001 | Unresolved internal reference | parser + registry | missing target candidate | ambiguous wording / target version |
-| REF-002 | Reference level mismatch | rule + parser | paragraph/article mismatch | natural-language citation forms |
-| REF-003 | Temporal/dead reference | version graph | target repealed/moved candidate | needs amendment history |
-| TXT-001 | Unbalanced parentheses/brackets | deterministic | location of imbalance | citations, quotations, footnotes may create false positives |
-| TXT-002 | Suspicious duplicate wording/definition | similarity / AI triage | pair of clauses | repetition may be intentional |
-| DATE-001 | Missing/ambiguous effective-date metadata | metadata check | uncertainty warning | effective date may be specified in article text |
-| AMEND-001 | Amendment mapping uncertainty | diff + human review | unmatched changed provisions | text similarity alone insufficient |
-| LOGIC-001 | Threshold boundary anomaly | executable model/property tests | edge-case test | only for rules faithfully modeled |
-| LOGIC-002 | Contradictory rule candidates | AI + symbolic checks | review case | not a legal conclusion |
+| ID | Check | Method | Caveat |
+|---|---|---|---|
+| STR-001 | duplicate article labels within parsed heading scope | deterministic | Historical numbering and missing scope headings may cause false positives |
+| STR-002 | malformed hierarchy/labels | parser (planned) | Persian formatting variants |
+| REF-001 | reference target absent from supplied corpus | parser + registry; review-only | external laws and incomplete corpora are common false-positive sources |
+| REF-002 | citation level mismatch | heuristic (planned) | flexible citation wording |
+| REF-003 | repealed/renumbered target | temporal graph (planned) | amendment history required |
+| TXT-001 | unbalanced parentheses/brackets/braces | deterministic | quoted text and footnotes can trigger |
+| TXT-002 | duplicate wording/definition | similarity/AI triage (planned) | repetition may be intentional |
+| DATE-001 | missing/unclear effective date | metadata check (planned) | dates can occur in text |
+| AMEND-001 | uncertain amendment mapping | diff + review (planned) | similarity is not legal proof |
+| LOGIC-001 | threshold boundary anomaly | executable/property tests (planned) | model fidelity must be reviewed |
+| LOGIC-002 | possible rule conflict | AI/symbolic triage (planned) | not a legal conclusion |
 
-## Test severity
-- **Info:** formatting/coverage issue
-- **Warning:** possible structural defect
-- **Review:** potential substantive defect requiring legal expert
-- **Confirmed:** only human/source review; never automatic
+Severity: Info / Warning / Review. “Confirmed” requires human review and authoritative evidence.

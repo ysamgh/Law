@@ -17,6 +17,8 @@ class Provision:
     article: str
     start_line: int
     text: str
+    scope: str = ""
+    status_marker: str = ""
 
 @dataclass
 class Finding:
@@ -37,19 +39,36 @@ def parse_provisions(text: str) -> list[Provision]:
     current = None
     body: list[str] = []
     start = 1
+    scope_levels: dict[int, str] = {}
+    current_scope = ""
+    status_marker = ""
+    scope = ""
     for line_no, raw in enumerate(text.splitlines(), 1):
         line = normalize_digits(raw).strip()
+        heading = re.match(r"^(باب|فصل|بخش)\s*(.*)$", line)
+        if heading:
+            level = {"باب": 1, "فصل": 2, "بخش": 3}[heading.group(1)]
+            if current is not None:
+                provisions.append(Provision(current, start, "\n".join(body), scope, status_marker))
+                current, body = None, []
+            scope_levels[level] = line
+            for deeper in [k for k in scope_levels if k > level]:
+                del scope_levels[deeper]
+            current_scope = " / ".join(scope_levels[k] for k in sorted(scope_levels))
         match = _ARTICLE_RE.match(line)
         if match:
             if current is not None:
-                provisions.append(Provision(current, start, "\n".join(body)))
+                provisions.append(Provision(current, start, "\n".join(body), scope, status_marker))
             current = normalize_text(match.group(1))
-            body = [match.group(2)] if match.group(2) else []
+            header = match.group(2)
+            status_marker = next((tag for tag in ("منسوخه", "جایگزین", "الحاقی", "اصلاحی") if tag in header), "")
+            body = [header] if header else []
             start = line_no
-        elif current is not None:
+            scope = current_scope
+        elif current is not None and not heading:
             body.append(raw)
     if current is not None:
-        provisions.append(Provision(current, start, "\n".join(body)))
+        provisions.append(Provision(current, start, "\n".join(body), scope, status_marker))
     return provisions
 
 def _balance_errors(text: str) -> list[tuple[str, int]]:
@@ -73,12 +92,15 @@ def lint_text(text: str) -> dict:
     findings: list[Finding] = []
     line_map = text.splitlines()
     article_ids: dict[str, Provision] = {}
+    scoped_seen: set[tuple[str, str]] = set()
     for p in provisions:
-        if p.article in article_ids:
+        key = (p.scope, p.article)
+        if key in scoped_seen:
             findings.append(Finding("STR-001", "warning", p.article, p.start_line,
-                line_map[p.start_line-1].strip(), f"Duplicate article label: ماده {p.article}. Check scope and source formatting."))
+                line_map[p.start_line-1].strip(), f"Duplicate article label: ماده {p.article} within scope {p.scope or '(no heading)'}. Check history and numbering."))
         else:
-            article_ids[p.article] = p
+            scoped_seen.add(key)
+        article_ids.setdefault(p.article, p)
         for msg, offset in _balance_errors(p.text):
             findings.append(Finding("TXT-001", "warning", p.article, p.start_line,
                 p.text[max(0, offset-30):offset+30].replace("\n", " "), f"Delimiter imbalance candidate: {msg}."))
@@ -86,8 +108,7 @@ def lint_text(text: str) -> dict:
     for p in provisions:
         norm = normalize_digits(p.text)
         for match in _REF_RE.finditer(norm):
-            citation = match.group(1)
-            targets = re.findall(r"\d+(?:\s*مکرر)?", citation)
+            targets = re.findall(r"\d+(?:\s*مکرر)?", match.group(1))
             for target in targets:
                 target = normalize_text(target)
                 if target not in known:
@@ -102,5 +123,6 @@ def lint_text(text: str) -> dict:
         "limitations": ["Reference findings are candidates, not confirmed legal defects.",
             "Only article-level structure is parsed in this MVP; تبصره/بند/جزء hierarchy is not yet fully modeled.",
             "The input is treated as a single corpus. References to other laws can be flagged as unresolved.",
+            "Duplicate numbering checks are scoped to parsed باب/فصل/بخش headings, but historical numbering may still cause false positives.",
             "A clean report does not establish legal validity, completeness, or currentness of the source text."]
     }

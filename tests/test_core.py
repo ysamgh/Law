@@ -18,6 +18,9 @@ class ParserTests(unittest.TestCase):
         self.assertIn("STR-001", ids)
         self.assertIn("REF-001", ids)
         self.assertIn("TXT-001", ids)
+    def test_duplicate_labels_across_chapters_not_reported(self):
+        corpus = "باب اول\nماده ۱- متن اول.\nباب دوم\nماده ۱- متن دوم."
+        self.assertNotIn("STR-001", [f["rule_id"] for f in lint_text(corpus)["findings"]])
     def test_valid_text_no_findings(self):
         clean = "ماده ۱- به ماده ۲ ارجاع دارد.\nماده ۲- متن."
         self.assertEqual(lint_text(clean)["summary"]["findings"], 0)

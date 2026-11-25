@@ -10,13 +10,14 @@
 - [x] UTF-8 text input
 - [x] Persian/Arabic digit normalization
 - [x] article-heading parser
+- [x] heading scope extraction for باب/فصل/بخش
 - [x] basic provision JSON structure
 - [ ] PDF/HTML ingestion with page/line anchors
 - [ ] تبصره / بند / جزء hierarchy
 - [ ] source manifest + checksums
 
 ## Phase 2 — deterministic lint
-- [x] duplicate article labels (STR-001)
+- [x] duplicate article labels scoped to parsed headings (STR-001)
 - [x] delimiter balance (TXT-001)
 - [x] basic article reference extraction (REF-001, review-only)
 - [x] JSON + Markdown report
