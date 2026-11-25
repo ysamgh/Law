@@ -1,5 +1,5 @@
 import unittest
-from lawlint.core import normalize_digits, parse_provisions, lint_text
+from lawlint.core import normalize_digits, parse_provisions, parse_subprovisions, lint_text
 
 FIXTURE = """قانون نمونه
 ماده ۱- این قانون به ماده ۲ ارجاع دارد.
