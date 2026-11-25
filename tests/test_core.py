@@ -9,7 +9,7 @@ FIXTURE = """قانون نمونه
 """
 class ParserTests(unittest.TestCase):
     def test_subprovision_extraction(self):
-        text = "ماده ۱- متن ماده.\\nتبصره ۱- متن تبصره\\nالف) بند اول\\n۲) جزء دوم\\nماده ۲- ماده بعد"
+        text = "ماده ۱- متن ماده.\nتبصره ۱- متن تبصره\nالف) بند اول\n۲) جزء دوم\nماده ۲- ماده بعد"
         found = parse_subprovisions(text)
         self.assertEqual([(x.parent_article, x.kind, x.label) for x in found], [("1", "تبصره", "1"), ("1", "بند", "الف"), ("1", "جزء", "2")])
         self.assertEqual(lint_text(text)["summary"]["subprovisions_parsed"], 3)
