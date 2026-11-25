@@ -46,7 +46,7 @@ def parse_subprovisions(text: str) -> list[SubProvision]:
     body: list[str] = []
     def flush():
         if parent and current_kind:
-            rows.append(SubProvision(parent, current_kind, current_label or "", current_start, "\\n".join(body).strip()))
+            rows.append(SubProvision(parent, current_kind, current_label or "", current_start, "\n".join(body).strip()))
     for line_no, raw in enumerate(text.splitlines(), 1):
         line = normalize_digits(raw).strip()
         article_match = _ARTICLE_RE.match(line)
