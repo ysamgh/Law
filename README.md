@@ -11,7 +11,7 @@ A runnable Python CLI that currently checks:
 - `REF-001`: article citations whose target is absent from the supplied corpus (review-only; external citations and incomplete corpora cause false positives)
 - `TXT-001`: unbalanced `()`, `[]`, `{}` delimiters
 
-It parses article headings using Persian and Arabic numerals, preserves source excerpts, and outputs JSON and Markdown reports.
+It parses article headings using Persian and Arabic numerals, preserves source excerpts, heuristically extracts تبصره/بند/جزء markers, and outputs JSON and Markdown reports. Subprovision extraction is experimental and does not yet model legal nesting.
 
 ### Run locally
 
