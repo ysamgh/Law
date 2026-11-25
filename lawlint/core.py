@@ -20,6 +20,60 @@ class Provision:
     scope: str = ""
     status_marker: str = ""
 
+
+
+@dataclass
+class SubProvision:
+    parent_article: str
+    kind: str
+    label: str
+    start_line: int
+    text: str
+
+_SUBPROVISION_PATTERNS = [
+    ("تبصره", re.compile(r"^تبصره(?:\s+([0-9]+))?\s*[-–—:]?\s*(.*)$")),
+    ("بند", re.compile(r"^(?:بند\s+)?([الف-ی])\s*[)ـ.،:-]\s*(.*)$")),
+    ("جزء", re.compile(r"^(?:جزء\s+)?([0-9]+)\s*[)ـ.،:-]\s*(.*)$")),
+]
+
+def parse_subprovisions(text: str) -> list[SubProvision]:
+    """Extract obvious note/item markers under article headings; heuristic, not legal-semantic parsing."""
+    rows: list[SubProvision] = []
+    parent = None
+    current_kind = None
+    current_label = None
+    current_start = 0
+    body: list[str] = []
+    def flush():
+        if parent and current_kind:
+            rows.append(SubProvision(parent, current_kind, current_label or "", current_start, "\\n".join(body).strip()))
+    for line_no, raw in enumerate(text.splitlines(), 1):
+        line = normalize_digits(raw).strip()
+        article_match = _ARTICLE_RE.match(line)
+        if article_match:
+            flush()
+            parent = normalize_text(article_match.group(1))
+            current_kind = current_label = None
+            body = []
+            continue
+        if parent is None:
+            continue
+        matched = None
+        for kind, pattern in _SUBPROVISION_PATTERNS:
+            m = pattern.match(line)
+            if m:
+                matched = (kind, normalize_text(m.group(1) or ""), m.group(2))
+                break
+        if matched:
+            flush()
+            current_kind, current_label, first_text = matched
+            current_start = line_no
+            body = [first_text] if first_text else []
+        elif current_kind:
+            body.append(raw)
+    flush()
+    return rows
+
 @dataclass
 class Finding:
     rule_id: str
@@ -116,12 +170,13 @@ def lint_text(text: str) -> dict:
                         match.group(0), f"Reference target ماده {target} was not found in this input corpus. This may be an external-law citation, omitted corpus material, or a real broken reference; verify manually.", confidence="medium"))
     return {
         "tool": "lawlint", "version": "0.1.0",
-        "summary": {"provisions_parsed": len(provisions), "findings": len(findings),
+        "summary": {"provisions_parsed": len(provisions), "subprovisions_parsed": len(parse_subprovisions(text)), "findings": len(findings),
             "by_rule": {r: sum(f.rule_id == r for f in findings) for r in sorted({f.rule_id for f in findings})}},
         "provisions": [asdict(p) for p in provisions],
+        "subprovisions": [asdict(s) for s in parse_subprovisions(text)],
         "findings": [asdict(f) for f in findings],
         "limitations": ["Reference findings are candidates, not confirmed legal defects.",
-            "Only article-level structure is parsed in this MVP; تبصره/بند/جزء hierarchy is not yet fully modeled.",
+            "Subprovision markers (تبصره/بند/جزء) are heuristically extracted; nesting and semantic relationships are not fully modeled.",
             "The input is treated as a single corpus. References to other laws can be flagged as unresolved.",
             "Duplicate numbering checks are scoped to parsed باب/فصل/بخش headings, but historical numbering may still cause false positives.",
             "A clean report does not establish legal validity, completeness, or currentness of the source text."]
