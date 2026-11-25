@@ -1,0 +1,22 @@
+{
+  "jurisdiction": "IR",
+  "document_id": null,
+  "title": null,
+  "document_type": "law",
+  "official_source_url": null,
+  "official_source_identifier": null,
+  "publisher": null,
+  "approval_date": null,
+  "publication_date": null,
+  "retrieved_at": null,
+  "version_label": null,
+  "status": null,
+  "amendment_notes": null,
+  "raw_file_path": null,
+  "raw_sha256": null,
+  "extracted_text_path": null,
+  "text_sha256": null,
+  "extractor": null,
+  "extractor_version": null,
+  "review_status": "unverified"
+}
