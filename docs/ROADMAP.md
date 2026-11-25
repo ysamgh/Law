@@ -3,8 +3,9 @@
 ## Phase 0 — feasibility
 - [x] scope and architecture
 - [x] initial source candidates/check catalog
+- [x] source audit and source hierarchy documented (primary portal access observed; acquisition/reuse still pending)
 - [ ] verify official source access, version metadata, extraction, and reuse terms
-- [ ] select one bounded pilot law and its amendments
+- [ ] select one bounded pilot law and its amendments (prefer small/stable pilot before tax statute)
 
 ## Phase 1 — ingestion and parser
 - [x] UTF-8 text input
@@ -13,8 +14,9 @@
 - [x] heading scope extraction for باب/فصل/بخش
 - [x] basic provision JSON structure
 - [ ] PDF/HTML ingestion with page/line anchors
-- [ ] تبصره / بند / جزء hierarchy
-- [ ] source manifest + checksums
+- [x] heuristic extraction for تبصره / بند / جزء (non-semantic, experimental)
+- [ ] nested hierarchy and semantic relationships
+- [ ] source manifest + checksums (schema documented; tooling pending)
 
 ## Phase 2 — deterministic lint
 - [x] duplicate article labels scoped to parsed headings (STR-001)
