@@ -1,0 +1,24 @@
+import unittest
+from lawlint.core import normalize_digits, parse_provisions, lint_text
+
+FIXTURE = """قانون نمونه
+ماده ۱- این قانون به ماده ۲ ارجاع دارد.
+ماده ۲- متن صحیح است.
+ماده ۳- ارجاع به ماده ۹۹ و متن (ناقص.
+ماده ۳- شماره تکراری است.
+"""
+class ParserTests(unittest.TestCase):
+    def test_digits(self):
+        self.assertEqual(normalize_digits("۱۲٣"), "123")
+    def test_articles_parsed(self):
+        self.assertEqual([p.article for p in parse_provisions(FIXTURE)], ["1", "2", "3", "3"])
+    def test_lint_detects_expected(self):
+        report = lint_text(FIXTURE)
+        ids = [f["rule_id"] for f in report["findings"]]
+        self.assertIn("STR-001", ids)
+        self.assertIn("REF-001", ids)
+        self.assertIn("TXT-001", ids)
+    def test_valid_text_no_findings(self):
+        clean = "ماده ۱- به ماده ۲ ارجاع دارد.\nماده ۲- متن."
+        self.assertEqual(lint_text(clean)["summary"]["findings"], 0)
+if __name__ == "__main__": unittest.main()

@@ -1,0 +1,11 @@
+[project]
+name = "lawlint"
+version = "0.1.0"
+description = "Experimental structural linter for Persian legal text"
+requires-python = ">=3.10"
+
+[project.scripts]
+lawlint = "lawlint.cli:main"
+
+[tool.setuptools]
+packages = ["lawlint"]
